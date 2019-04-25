@@ -6,18 +6,24 @@ const ROOMS = ROOM_LIST.split(",");
 const packageJson = require("./package.json");
 
 const runbot = async () => {
-    const conn = await driver.connect({ host: HOST, useSsl: SSL })
-    const myuserid = await driver.login({ username: USER, password: PASS });
-    const roomsJoined = await driver.joinRooms(ROOMS);
-    console.log('joined rooms');
+    try {
+    	const conn = await driver.connect({ host: HOST, useSsl: SSL })
+    	console.log(driver);
+	    const myuserid = await driver.login({ username: USER, password: PASS });
+	    console.log(driver);
+	    const roomsJoined = await driver.joinRooms(ROOMS);
+	    console.log('joined rooms');
 
-    // set up subscriptions - rooms we are interested in listening to
-    const subscribed = await driver.subscribeToMessages();
-    console.log('subscribed');
+	    // set up subscriptions - rooms we are interested in listening to
+	    const subscribed = await driver.subscribeToMessages();
+	    console.log('subscribed');
 
-    // connect the processMessages callback
-    const msgloop = await driver.reactToMessages(processMessages(myuserid));
-    console.log('connected and waiting for messages');
+	    // connect the processMessages callback
+	    const msgloop = await driver.reactToMessages(processMessages(myuserid));
+	    console.log('connected and waiting for messages');
+	} catch (e) {
+		setTimeout(() => runbot(), 60 * 1000);
+	}
 }
 
 // callback for incoming messages filter and processing
@@ -35,19 +41,29 @@ const processMessages = (myuserid) => async(err, message, messageOptions) => {
 		return;
 	}
 	const args = message.msg.slice(1).split(" ");
-	switch (args[0]) {
-		case "version":
-			handleVersionCheck(roomname)(...args.slice(1));
-			break;
-		case "live":
-			handleLiveCheck(roomname)();
-			break;
-		case "help":
-			handleHelp(roomname)();
-			break;
-		case "health":
-			handleHealth(roomname)(...args.slice(1));
-			break;
+	try {
+		switch (args[0]) {
+			case "version":
+				await handleVersionCheck(roomname)(...args.slice(1));
+				break;
+			case "live":
+				await handleLiveCheck(roomname)();
+				break;
+			case "help":
+				await handleHelp(roomname)();
+				break;
+			case "health":
+				await handleHealth(roomname)(...args.slice(1));
+				break;
+		}
+	} catch (e) {
+		console.log(e);
+		const sentmsg = await driver.sendToRoom(
+			`An error occurred while executing '${message.msg}':
+${e}
+			`,
+			roomname,
+		);
 	}
 }
 
