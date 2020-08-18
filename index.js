@@ -1,6 +1,6 @@
 const { driver } = require("@rocket.chat/sdk");
 const fetch = require("node-fetch");
-const { HOST, USER, PASS, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ROOM_LIST } = process.env;
+const { HOST, TOKEN, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ROOM_LIST } = process.env;
 const SSL = true;
 const ROOMS = ROOM_LIST.split(",");
 const packageJson = require("./package.json");
@@ -9,7 +9,7 @@ const runbot = async () => {
     try {
     	const conn = await driver.connect({ host: HOST, useSsl: SSL })
     	console.log(driver);
-	    const myuserid = await driver.login({ username: USER, password: PASS });
+	    const myuserid = await driver.asteroid.login({ resume: TOKEN });
 	    console.log(driver);
 	    const roomsJoined = await driver.joinRooms(ROOMS);
 	    console.log('joined rooms');
