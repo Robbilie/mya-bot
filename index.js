@@ -27,10 +27,11 @@ const runbot = async () => {
 }
 
 // callback for incoming messages filter and processing
-const processMessages = (myuserid) => async(err, message, messageOptions) => {
+const processMessages = (myuserid) => async(err, msg, messageOptions) => {
 	if (err) {
 		return;
 	}
+	const message = msg instanceof Array ? msg[0] : msg;
 	// filter our own message
 	if (message.u._id === myuserid) {
 		//return;
