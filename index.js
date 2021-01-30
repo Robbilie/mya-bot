@@ -69,6 +69,13 @@ ${e}
 }
 
 const handleVersionCheck = (roomname) => async (env, shortName = "mwa") => {
+	if (!env) {
+		await driver.sendToRoom(
+			`Invalid value provided for the parameter [ENV]: ${env}`,
+			roomname,
+		);
+		return;
+	}
 	const response = await fetch(
 		`https://${env}.retailservices.audi.de/${shortName}/v1/management/info`,
 		{
